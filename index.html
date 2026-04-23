@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Le Voyage Heure - Calculateur</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: white;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      border-radius: 20px;
+      background: #0F2E63;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      text-align: center;
+      color: #F2AA1B;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 10px;
+      border: none;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 15px;
+      border: none;
+      border-radius: 15px;
+      background: #F2AA1B;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #111;
+      border-radius: 15px;
+    }
+
+    .highlight {
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(242,170,27,0.2);
+      border-radius: 15px;
+      font-weight: bold;
+      color: #F2AA1B;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Le Voyage Heure</h1>
+
+  <label>Nombre de personnes</label>
+  <input type="number" id="people">
+
+  <label>Durée (minutes)</label>
+  <input type="number" id="duration">
+
+  <label>Nombre de consommations</label>
+  <input type="number" id="consumptions">
+
+  <label>Prix de la note en cours (€)</label>
+  <input type="number" step="0.01" id="bill">
+
+  <button onclick="calculate()">Calculer</button>
+  <button onclick="resetFields()" style="background:#444; color:white; margin-top:10px;">
+    Reset
+  </button>
+
+  <div class="result" id="details"></div>
+  <div class="highlight" id="final"></div>
+</div>
+
+<script>
+function formatEuro(value) {
+  return value.toFixed(2) + " €";
+}
+
+function calculate() {
+  const people = Number(document.getElementById("people").value);
+  const minutes = Number(document.getElementById("duration").value);
+  const consumptions = Number(document.getElementById("consumptions").value);
+  const bill = Number(document.getElementById("bill").value);
+
+  const hours = minutes / 60;
+
+  const expectedConsumptions = people * hours;
+  const expectedAmount = people * hours * 3;
+
+  const calc1 = (expectedConsumptions - consumptions) * 2.4 - bill;
+  const calc2 = expectedAmount - bill;
+
+  let result = Math.min(calc1, calc2);
+
+  // 🔒 sécurité : pas de négatif
+  if (result < 0) result = 0;
+
+  document.getElementById("details").innerHTML = `
+    Durée en heures : ${hours.toFixed(2)} h<br>
+    Conso attendues : ${expectedConsumptions.toFixed(2)}<br>
+    Montant attendu : ${formatEuro(expectedAmount)}<br><br>
+    Calcul 1 : ${formatEuro(calc1)}<br>
+    Calcul 2 : ${formatEuro(calc2)}
+  `;
+
+  document.getElementById("final").innerHTML =
+    "Il reste à payer au client : " + formatEuro(result);
+}
+
+function resetFields() {
+  document.getElementById("people").value = "";
+  document.getElementById("duration").value = "";
+  document.getElementById("consumptions").value = "";
+  document.getElementById("bill").value = "";
+
+  document.getElementById("details").innerHTML = "";
+  document.getElementById("final").innerHTML = "";
+}
+</script>
+
+</body>
+</html>
