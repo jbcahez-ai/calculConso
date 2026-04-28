@@ -26,7 +26,7 @@ function calculate() {
   const expectedConsumptions = people * consumptionsPerSession;
   const expectedAmount = expectedConsumptions * 3;
 
-  const calc1 = (expectedConsumptions - consumptions) * 2.4 - bill;
+  const calc1 = expectedConsumptions <= consumptions ? 0 : (expectedConsumptions - consumptions) * 2.4;
   
   // Calc2 : nbre de personnes × nbre de tranches de 20min (tolérance 2min) × 0.80€
   const twentyMinutesBlocks = Math.floor((minutes - 2) / 20);
