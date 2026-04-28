@@ -24,18 +24,23 @@ function calculate() {
   // Conso par heure entamée avec 20min de tolérance (minimum 1 conso)
   const consumptionsPerSession = Math.max(1, Math.ceil((minutes - 20) / 60));
   const expectedConsumptions = people * consumptionsPerSession;
-  const expectedAmount = expectedConsumptions * 3;
+  
+  // Montant attendu : nbre de tranches de 20min (tolérance 2min) × 1€ × nbre de personnes
+  const twentyMinutesBlocks = Math.ceil((minutes - 2) / 20);
+  const expectedAmount = people * twentyMinutesBlocks * 1;
 
   const calc1 = expectedConsumptions <= consumptions ? 0 : (expectedConsumptions - consumptions) * 2.4;
   
-  // Calc2 : nbre de personnes × nbre de tranches de 20min (tolérance 2min) × 0.80€
-  const twentyMinutesBlocks = Math.floor((minutes - 2) / 20);
-  const calc2 = people * twentyMinutesBlocks * 0.80 - bill;
+  // Calc2 : montant attendu - prix de la note en cours
+  const calc2 = expectedAmount - bill;
 
   let result = Math.min(calc1, calc2);
 
   // 🔒 Sécurité : pas de négatif
   if (result < 0) result = 0;
+
+  // Arrondir au-dessus au multiple de 0.80€
+  result = Math.ceil(result / 0.80) * 0.80;
 
   document.getElementById("details").innerHTML = `
     <strong>Détails du calcul :</strong><br><br>
