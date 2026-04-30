@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logs - Le Voyage Heure</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: white;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+      border-radius: 20px;
+      background: #0F2E63;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      text-align: center;
+      color: #F2AA1B;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.3s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .btn-download {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .btn-clear {
+      background: #f44336;
+      color: white;
+    }
+
+    .btn-back {
+      background: #F2AA1B;
+      color: black;
+    }
+
+    .logs-container {
+      background: #111;
+      border-radius: 10px;
+      padding: 15px;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      padding: 10px;
+      margin: 5px 0;
+      background: #0F2E63;
+      border-left: 3px solid #F2AA1B;
+      border-radius: 5px;
+      font-size: 12px;
+      word-break: break-all;
+    }
+
+    .log-empty {
+      text-align: center;
+      color: #999;
+      padding: 30px;
+    }
+
+    .stats {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(242,170,27,0.2);
+      border-radius: 10px;
+      color: #F2AA1B;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📊 Logs - Le Voyage Heure</h1>
+
+  <div class="controls">
+    <button class="btn-download" onclick="downloadLogs()">📥 Télécharger les logs</button>
+    <button class="btn-clear" onclick="clearLogs()">🗑️ Effacer tous les logs</button>
+    <button class="btn-back" onclick="window.location.href='index.html'">← Retour au calculateur</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="logs-container" id="logsContainer"></div>
+</div>
+
+<script>
+function formatDateTime(date) {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+}
+
+function displayLogs() {
+  const logs = JSON.parse(localStorage.getItem('logs') || '[]');
+  const container = document.getElementById('logsContainer');
+  const statsDiv = document.getElementById('stats');
+
+  if (logs.length === 0) {
+    container.innerHTML = '<div class="log-empty">Aucun log enregistré</div>';
+    statsDiv.innerHTML = '📈 Aucun calcul effectué pour le moment';
+    return;
+  }
+
+  let html = '';
+  logs.forEach((log, index) => {
+    html += `
+      <div class="log-entry">
+        <strong>#${index + 1}</strong> | ${log.dateTime}<br>
+        👥 ${log.people} pers | ⏱️ ${log.minutes}min | 🍹 ${log.consumptions}/${log.expectedConsumptions.toFixed(2)} consos | 💰 ${log.bill.toFixed(2)}€ | 📊 Attendu: ${log.expectedAmount.toFixed(2)}€ | Calc1: ${log.calc1.toFixed(2)}€ | Calc2: ${log.calc2.toFixed(2)}€ | <strong style="color:#F2AA1B">À payer: ${log.result.toFixed(2)}€</strong>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+  statsDiv.innerHTML = `📈 Total: ${logs.length} calcul(s) | Dernier: ${logs[logs.length - 1].dateTime}`;
+}
+
+function downloadLogs() {
+  const logs = JSON.parse(localStorage.getItem('logs') || '[]');
+  if (logs.length === 0) {
+    alert('Aucun log à télécharger');
+    return;
+  }
+
+  let content = 'LOG - Le Voyage Heure\n';
+  content += '=' + '='.repeat(150) + '\n\n';
+
+  logs.forEach((log, index) => {
+    content += `#${index + 1} | ${log.dateTime} | Personnes: ${log.people} | Durée: ${log.minutes}min | Consos: ${log.consumptions}/${log.expectedConsumptions.toFixed(2)} | Note: ${log.bill.toFixed(2)}€ | Attendu: ${log.expectedAmount.toFixed(2)}€ | Calc1: ${log.calc1.toFixed(2)}€ | Calc2: ${log.calc2.toFixed(2)}€ | À payer: ${log.result.toFixed(2)}€\n`;
+  });
+
+  const element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+  const fileName = `logs_${formatDateTime(new Date()).replace(/\//g, '-').replace(/ /g, '_').replace(/:/g, '-')}.txt`;
+  element.setAttribute('download', fileName);
+  element.style.display = 'none';
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+}
+
+function clearLogs() {
+  if (confirm('Êtes-vous sûr de vouloir effacer tous les logs ?')) {
+    localStorage.removeItem('logs');
+    displayLogs();
+    alert('Logs effacés');
+  }
+}
+
+// Afficher les logs au chargement
+displayLogs();
+</script>
+
+</body>
+</html>

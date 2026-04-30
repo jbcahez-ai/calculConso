@@ -7,6 +7,34 @@ function formatEuro(value) {
   return value.toFixed(2) + " €";
 }
 
+function formatDateTime(date) {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+}
+
+function addLog(people, minutes, consumptions, expectedConsumptions, expectedAmount, calc1, calc2, result) {
+  const logs = JSON.parse(localStorage.getItem('logs') || '[]');
+  const logEntry = {
+    dateTime: formatDateTime(new Date()),
+    people,
+    minutes,
+    consumptions,
+    bill: Number(document.getElementById("bill").value),
+    expectedConsumptions,
+    expectedAmount,
+    calc1,
+    calc2,
+    result
+  };
+  logs.push(logEntry);
+  localStorage.setItem('logs', JSON.stringify(logs));
+}
+
 function calculate() {
   const people = Number(document.getElementById("people").value);
   const minutes = Number(document.getElementById("duration").value);
@@ -41,6 +69,9 @@ function calculate() {
 
   // Arrondir au-dessus au multiple de 0.80€
   result = Math.ceil(result / 0.80) * 0.80;
+
+  // Ajouter au log
+  addLog(people, minutes, consumptions, expectedConsumptions, expectedAmount, calc1, calc2, result);
 
   document.getElementById("details").innerHTML = `
     <strong>Détails du calcul :</strong><br><br>
