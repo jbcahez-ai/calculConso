@@ -7,6 +7,21 @@ function formatEuro(value) {
   return value.toFixed(2) + " €";
 }
 
+function formatTime(input) {
+  let value = input.value.replace(/[^0-9]/g, ''); // Garder que les chiffres
+  
+  if (value.length > 4) {
+    value = value.slice(0, 4); // Limiter à 4 chiffres
+  }
+  
+  if (value.length >= 3) {
+    // Ajouter le ':' après 2 chiffres
+    input.value = value.slice(0, 2) + ':' + value.slice(2);
+  } else {
+    input.value = value;
+  }
+}
+
 function formatDateTime(date) {
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -43,37 +58,53 @@ function getDeductionMinutes() {
   return deduction;
 }
 
-function formatTime(input) {
-  let value = input.value.replace(/[^0-9]/g, ''); // Garder que les chiffres
-  
-  if (value.length > 4) {
-    value = value.slice(0, 4); // Limiter à 4 chiffres
-  }
-  
-  if (value.length >= 3) {
-    // Ajouter le ':' après 2 chiffres
-    input.value = value.slice(0, 2) + ':' + value.slice(2);
-  } else {
-    input.value = value;
-  }
-}
-
 function calculateDurationFromTimes() {
   const arrival = document.getElementById("arrivalTime").value.trim();
   const departure = document.getElementById("departureTime").value.trim();
 
+  console.log('Arrival:', arrival, 'Departure:', departure); // DEBUG
+
   if (!arrival || !departure) {
+    console.log('Horaires vides');
     return 0;
   }
 
-  // Valider le format HH:MM
-  const timeRegex = /^([0-1][0-9]|2[0-3]):([0-5][0-9])$/;
-  if (!timeRegex.test(arrival) || !timeRegex.test(departure)) {
-    return 0;
+  let arrHour, arrMin, depHour, depMin;
+  
+  // Format "HH:MM" ou "HHMM"
+  if (arrival.includes(':')) {
+    const parts = arrival.split(':');
+    arrHour = parseInt(parts[0]);
+    arrMin = parseInt(parts[1]);
+  } else {
+    arrHour = parseInt(arrival.substring(0, 2));
+    arrMin = parseInt(arrival.substring(2, 4));
   }
 
-  const [arrHour, arrMin] = arrival.split(':').map(Number);
-  const [depHour, depMin] = departure.split(':').map(Number);
+  if (departure.includes(':')) {
+    const parts = departure.split(':');
+    depHour = parseInt(parts[0]);
+    depMin = parseInt(parts[1]);
+  } else {
+    depHour = parseInt(departure.substring(0, 2));
+    depMin = parseInt(departure.substring(2, 4));
+  }
+
+  console.log('Parsed:', arrHour, arrMin, depHour, depMin); // DEBUG
+
+  // Vérifier si valides
+  if (isNaN(arrHour) || isNaN(arrMin) || isNaN(depHour) || isNaN(depMin)) {
+    console.log('Valeurs invalides');
+    return 0;
+  }
+  if (arrHour < 0 || arrHour > 23 || arrMin < 0 || arrMin > 59) {
+    console.log('Arrivée invalide');
+    return 0;
+  }
+  if (depHour < 0 || depHour > 23 || depMin < 0 || depMin > 59) {
+    console.log('Départ invalide');
+    return 0;
+  }
 
   let arrivalMinutes = arrHour * 60 + arrMin;
   let departureMinutes = depHour * 60 + depMin;
@@ -83,7 +114,9 @@ function calculateDurationFromTimes() {
     departureMinutes += 24 * 60;
   }
 
-  return departureMinutes - arrivalMinutes;
+  const duration = departureMinutes - arrivalMinutes;
+  console.log('Duration:', duration); // DEBUG
+  return duration;
 }
 
 function updateDuration() {
@@ -101,8 +134,18 @@ function calculate() {
   const bill = Number(document.getElementById("bill").value);
 
   // Validation des champs
-  if (isNaN(people) || people <= 0 || isNaN(minutes) || minutes <= 0 || isNaN(consumptions) || consumptions < 0 || isNaN(bill) || bill < 0) {
-    alert("Veuillez remplir tous les champs avec des valeurs valides");
+  if (!people || people <= 0) {
+    alert("Veuillez entrer le nombre de personnes");
+    return;
+  }
+  
+  if (minutes <= 0) {
+    alert("Veuillez entrer des horaires valides (arrivée et départ)");
+    return;
+  }
+  
+  if (isNaN(consumptions) || consumptions < 0 || isNaN(bill) || bill < 0) {
+    alert("Veuillez remplir les champs de consommations et note avec des valeurs valides");
     return;
   }
 
