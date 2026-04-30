@@ -29,21 +29,21 @@
     Durée : <strong id="durationDisplay">--</strong> min
   </div>
 
-  <label style="margin-top: 15px;">📍 À déduire</label>
-  <div style="display: flex; gap: 15px; margin-top: 8px; flex-wrap: wrap;">
+  <label style="margin-top: 15px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+    <span>📍 À déduire</span>
     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
       <input type="checkbox" id="escape" onchange="updateDuration()">
-      <span>Escape (-120 min)</span>
+      <span>Escape</span>
     </label>
     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
       <input type="checkbox" id="haches" onchange="updateDuration()">
-      <span>Haches (-60 min)</span>
+      <span>Haches</span>
     </label>
     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
       <input type="checkbox" id="levelup" onchange="updateDuration()">
-      <span>Level Up (-30 min)</span>
+      <span>Level Up</span>
     </label>
-  </div>
+  </label>
 
   <label>Nombre de consommations</label>
   <input type="number" id="consumptions">
