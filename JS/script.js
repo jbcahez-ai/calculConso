@@ -35,9 +35,68 @@ function addLog(people, minutes, consumptions, expectedConsumptions, expectedAmo
   localStorage.setItem('logs', JSON.stringify(logs));
 }
 
+function getDeductionMinutes() {
+  let deduction = 0;
+  if (document.getElementById("escape").checked) deduction += 120;
+  if (document.getElementById("haches").checked) deduction += 60;
+  if (document.getElementById("levelup").checked) deduction += 30;
+  return deduction;
+}
+
+function formatTime(input) {
+  let value = input.value.replace(/[^0-9]/g, ''); // Garder que les chiffres
+  
+  if (value.length > 4) {
+    value = value.slice(0, 4); // Limiter à 4 chiffres
+  }
+  
+  if (value.length >= 3) {
+    // Ajouter le ':' après 2 chiffres
+    input.value = value.slice(0, 2) + ':' + value.slice(2);
+  } else {
+    input.value = value;
+  }
+}
+
+function calculateDurationFromTimes() {
+  const arrival = document.getElementById("arrivalTime").value.trim();
+  const departure = document.getElementById("departureTime").value.trim();
+
+  if (!arrival || !departure) {
+    return 0;
+  }
+
+  // Valider le format HH:MM
+  const timeRegex = /^([0-1][0-9]|2[0-3]):([0-5][0-9])$/;
+  if (!timeRegex.test(arrival) || !timeRegex.test(departure)) {
+    return 0;
+  }
+
+  const [arrHour, arrMin] = arrival.split(':').map(Number);
+  const [depHour, depMin] = departure.split(':').map(Number);
+
+  let arrivalMinutes = arrHour * 60 + arrMin;
+  let departureMinutes = depHour * 60 + depMin;
+
+  // Si départ est avant arrivée, on ajoute 24h
+  if (departureMinutes < arrivalMinutes) {
+    departureMinutes += 24 * 60;
+  }
+
+  return departureMinutes - arrivalMinutes;
+}
+
+function updateDuration() {
+  const baseDuration = calculateDurationFromTimes();
+  const deduction = getDeductionMinutes();
+  const finalDuration = Math.max(0, baseDuration - deduction);
+
+  document.getElementById("durationDisplay").textContent = finalDuration;
+}
+
 function calculate() {
   const people = Number(document.getElementById("people").value);
-  const minutes = Number(document.getElementById("duration").value);
+  const minutes = calculateDurationFromTimes() - getDeductionMinutes();
   const consumptions = Number(document.getElementById("consumptions").value);
   const bill = Number(document.getElementById("bill").value);
 
@@ -88,18 +147,30 @@ function calculate() {
 
 function resetFields() {
   document.getElementById("people").value = "";
-  document.getElementById("duration").value = "";
+  document.getElementById("arrivalTime").value = "";
+  document.getElementById("departureTime").value = "";
   document.getElementById("consumptions").value = "";
   document.getElementById("bill").value = "";
+  document.getElementById("escape").checked = false;
+  document.getElementById("haches").checked = false;
+  document.getElementById("levelup").checked = false;
 
-  document.getElementById("details").innerHTML = "";
-  document.getElementById("final").innerHTML = "";
-}
-
-// Permet d'appuyer sur Entrée pour calculer
+  document.getElementById("durationDisplay") et met à jour la durée au changement
 document.addEventListener("DOMContentLoaded", function() {
-  const inputs = document.querySelectorAll("input");
+  const inputs = document.querySelectorAll("input[type='number'], input[type='time']");
+  const checkboxes = document.querySelectorAll("input[type='checkbox']");
+  
   inputs.forEach(input => {
+    input.addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        calculate();
+      }
+    });
+    input.addEventListener("change", updateDuration);
+  });
+
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener("change", updateDurationuts.forEach(input => {
     input.addEventListener("keypress", function(event) {
       if (event.key === "Enter") {
         calculate();
