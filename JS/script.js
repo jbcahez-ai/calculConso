@@ -42,7 +42,7 @@ function calculate() {
   const bill = Number(document.getElementById("bill").value);
 
   // Validation des champs
-  if (!people || !minutes || minutes < 0 || !consumptions || consumptions < 0 || bill < 0) {
+  if (isNaN(people) || people <= 0 || isNaN(minutes) || minutes <= 0 || isNaN(consumptions) || consumptions < 0 || isNaN(bill) || bill < 0) {
     alert("Veuillez remplir tous les champs avec des valeurs valides");
     return;
   }
